@@ -80,7 +80,7 @@ LISTEN_WS_TRANSPORT = None
 LISTEN_WSS_TRANSPORT = None
 
 # Salt used for Block Notify Password
-PASSWORD_SALT = 'some_crazy_string'
+PASSWORD_SALT = '24位数加密码（任意字母大小写），对应MPOS配置'
 
 # ******************** Database  *********************
 DATABASE_DRIVER = 'mysql'       # Options: none, sqlite, postgresql or mysql
@@ -138,7 +138,8 @@ VDIFF_X2_TYPE = True            # Powers of 2 e.g. 2,4,8,16,32,64,128,256,512,10
 VDIFF_FLOAT = False             # Use float difficulty
 
 # Pool Target (Base Difficulty)
-POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
+POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True            # Master variable difficulty enable
@@ -189,4 +190,4 @@ NOTIFY_EMAIL_USETLS = True
 MEMCACHE_HOST = "localhost"     # Hostname or IP that runs memcached
 MEMCACHE_PORT = 11211           # Port
 MEMCACHE_TIMEOUT = 900          # Key timeout
-MEMCACHE_PREFIX = "stratum_"    # Prefix for keys
+MEMCACHE_PREFIX = "stratum_币简称_"    # Prefix for keys
