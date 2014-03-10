@@ -93,6 +93,13 @@ class DBInterface():
         self.do_import(self.dbi, False)
         
         self.scheduleImport()
+        
+    def run_import_force(self):
+        log.debug("DBInterface.run_import called")
+        
+        self.do_import(self.dbi, True)
+        
+        self.scheduleImport()
 
     def import_thread(self):
         # Here we are in the thread.
@@ -195,7 +202,7 @@ class DBInterface():
     def user_exists(self, username):
         if self.cache.get(username) is not None:
             return True
-        user = self.dbi.get_user(username)
+        user = self.get_user(username)
         return user is not None 
 
     def insert_user(self, username, password):        
