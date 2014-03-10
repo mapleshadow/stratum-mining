@@ -9,14 +9,14 @@ You NEED to set the parameters in BASIC SETTINGS
 CONFIG_VERSION = 0.1
 # ******************** BASIC SETTINGS ***************
 # These are the MUST BE SET parameters!
-
+#钱包
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'                # Local coin address where money goes
-
+#RPC
 COINDAEMON_TRUSTED_HOST = 'localhost'
 COINDAEMON_TRUSTED_PORT = 8332
 COINDAEMON_TRUSTED_USER = 'user'
 COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
-
+#算法
 COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
 SCRYPTJANE_NAME = 'vtc_scrypt'# Set this to the Scrypt jane module name e.g. yac_scrypt or vtc_scrypt
 COINDAEMON_TX = False         # For Coins which support TX Messages please enter yes in the TX selection
@@ -67,7 +67,7 @@ HOSTNAME = 'localhost'
 
 # Disable the example service
 ENABLE_EXAMPLE_SERVICE = False
-
+#挖矿端口
 # Port used for Socket transport. Use 'None' for disabling the transport.
 LISTEN_SOCKET_TRANSPORT = 3333
 # Port used for HTTP Poll transport. Use 'None' for disabling the transport
@@ -80,7 +80,8 @@ LISTEN_WS_TRANSPORT = None
 LISTEN_WSS_TRANSPORT = None
 
 # Salt used for Block Notify Password
-PASSWORD_SALT = '24位数加密码（任意字母大小写），对应MPOS配置'
+#PASSWORD_SALT = '24位数加密码（任意字母大小写），对应MPOS配置'
+PASSWORD_SALT = 'aaaaaaaaAAAAAAAaaaaaaaaA'
 
 # ******************** Database  *********************
 DATABASE_DRIVER = 'mysql'       # Options: none, sqlite, postgresql or mysql
