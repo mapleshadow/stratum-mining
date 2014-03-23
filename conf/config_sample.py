@@ -139,8 +139,8 @@ VDIFF_X2_TYPE = True            # Powers of 2 e.g. 2,4,8,16,32,64,128,256,512,10
 VDIFF_FLOAT = False             # Use float difficulty
 
 # Pool Target (Base Difficulty)
-#POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
-POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
+POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True            # Master variable difficulty enable
