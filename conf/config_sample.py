@@ -9,14 +9,14 @@ You NEED to set the parameters in BASIC SETTINGS
 CONFIG_VERSION = 0.1
 # ******************** BASIC SETTINGS ***************
 # These are the MUST BE SET parameters!
-#钱包
+#wallet address
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'                # Local coin address where money goes
 #RPC
 COINDAEMON_TRUSTED_HOST = 'localhost'
 COINDAEMON_TRUSTED_PORT = 8332
 COINDAEMON_TRUSTED_USER = 'user'
 COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
-#算法
+#suan fa
 COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
 SCRYPTJANE_NAME = 'vtc_scrypt'# Set this to the Scrypt jane module name e.g. yac_scrypt or vtc_scrypt
 COINDAEMON_TX = False         # For Coins which support TX Messages please enter yes in the TX selection
@@ -67,7 +67,7 @@ HOSTNAME = 'localhost'
 
 # Disable the example service
 ENABLE_EXAMPLE_SERVICE = False
-#挖矿端口
+#wa kuang duan kou
 # Port used for Socket transport. Use 'None' for disabling the transport.
 LISTEN_SOCKET_TRANSPORT = 3333
 # Port used for HTTP Poll transport. Use 'None' for disabling the transport
@@ -81,6 +81,7 @@ LISTEN_WSS_TRANSPORT = None
 
 # Salt used for Block Notify Password
 #PASSWORD_SALT = '24位数加密码（任意字母大小写），对应MPOS配置'
+#PASSWORD_SALT = 'some_crazy_string'
 PASSWORD_SALT = 'aaaaaaaaAAAAAAAaaaaaaaaA'
 
 # ******************** Database  *********************
@@ -129,6 +130,7 @@ PREVHASH_REFRESH_INTERVAL = 5   # How often to check for new Blocks
                                 #   If using the blocknotify script (recommended) set = to MERKLE_REFRESH_INTERVAL
                                 #   (No reason to poll if we're getting pushed notifications)
 MERKLE_REFRESH_INTERVAL = 60    # How often check memorypool
+                                #   How often to check for new transactions to be added to the block
                                 #   This effectively resets the template and incorporates new transactions.
                                 #   This should be "slow"
 

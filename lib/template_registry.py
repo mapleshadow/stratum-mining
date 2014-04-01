@@ -192,10 +192,22 @@ class TemplateRegistry(object):
         
             - extranonce1_bin is binary. No checks performed, it should be from session data
             - job_id, extranonce2, ntime, nonce - in hex form sent by the client
-            - difficulty - decimal number from session, again no checks performed
+            - difficulty - decimal number from session
             - submitblock_callback - reference to method which receive result of submitblock()
+            - difficulty is checked to see if its lower than the vardiff minimum target or pool target
+              from conf/config.py and if it is the share is rejected due to it not meeting the requirements for a share
+              
         '''
-        
+        if settings.VARIABLE_DIFF == True:
+            # Share Diff Should never be 0 
+            if difficulty < settings.VDIFF_MIN_TARGET :
+        	log.exception("Worker %s @ IP: %s seems to be submitting Fake Shares"%(worker_name,ip))
+        	raise SubmitException("Diff is %s Share Rejected Reporting to Admin"%(difficulty))
+        else:
+             if difficulty < settings.POOL_TARGET:
+             	log.exception("Worker %s @ IP: %s seems to be submitting Fake Shares"%(worker_name,ip))
+        	raise SubmitException("Diff is %s Share Rejected Reporting to Admin"%(difficulty))
+        	
         # Check if extranonce2 looks correctly. extranonce2 is in hex form...
         if len(extranonce2) != self.extranonce2_size * 2:
             raise SubmitException("Incorrect size of extranonce2. Expected %d chars" % (self.extranonce2_size*2))
