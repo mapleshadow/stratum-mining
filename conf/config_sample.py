@@ -18,7 +18,7 @@ COINDAEMON_TRUSTED_USER = 'user'
 COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
 
 #COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
-COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, quark, and x11
+COINDAEMON_ALGO = 'xcoin'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, quark, and xcoin(x11)
 SCRYPTJANE_NAME = 'vtc_scrypt'# Set this to the Scrypt jane module name e.g. yac_scrypt or vtc_scrypt
 COINDAEMON_TX = False         # For Coins which support TX Messages please enter yes in the TX selection
 

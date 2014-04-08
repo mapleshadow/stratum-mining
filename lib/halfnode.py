@@ -29,6 +29,9 @@ elif settings.COINDAEMON_ALGO == 'scrypt-jane':
 elif settings.COINDAEMON_ALGO == 'quark':
     log.debug("########################################### Loading Quark Support #########################################################")
     import quark_hash
+elif settings.COINDAEMON_ALGO == 'xcoin':
+    log.debug("########################################### Loading Quark Support #########################################################")
+    import xcoin_hash
 elif settings.COINDAEMON_ALGO == 'skeinhash':
     import skeinhash
 
@@ -239,6 +242,8 @@ class CBlock(object):
             self.scryptjane = None
         elif settings.COINDAEMON_ALGO == 'quark':
             self.quark = None
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            self.xcoin = None
         elif settings.COINDAEMON_ALGO == 'skein':
             self.skein = None
         if settings.COINDAEMON_Reward == 'POS':
@@ -295,6 +300,18 @@ class CBlock(object):
                 r.append(struct.pack("<I", self.nNonce))
                 self.quark = uint256_from_str(quark_hash.getPoWHash(''.join(r)))
              return self.quark
+    elif settings.COINDAEMON_ALGO == 'xcoin':
+         def calc_xcoin(self):
+             if self.xcoin is None:
+                r = []
+                r.append(struct.pack("<i", self.nVersion))
+                r.append(ser_uint256(self.hashPrevBlock))
+                r.append(ser_uint256(self.hashMerkleRoot))
+                r.append(struct.pack("<I", self.nTime))
+                r.append(struct.pack("<I", self.nBits))
+                r.append(struct.pack("<I", self.nNonce))
+                self.xcoin = uint256_from_str(xcoin_hash.getPoWHash(''.join(r)))
+             return self.xcoin
     elif settings.COINDAEMON_ALGO == 'scrypt-jane':
         def calc_scryptjane(self):
              if self.scryptjane is None:
@@ -338,6 +355,8 @@ class CBlock(object):
             self.calc_scrypt()
         elif settings.COINDAEMON_ALGO == 'quark':
             self.calc_quark()
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            self.calc_xcoin()
         elif settings.COINDAEMON_ALGO == 'scrypt-jane':
             self.calc_scryptjane
         elif settings.COINDAEMON_ALGO == 'skein':
@@ -352,6 +371,9 @@ class CBlock(object):
                 return False
         elif settings.COINDAEMON_ALGO == 'quark':
             if self.quark > target:
+                return False
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            if self.xcoin > target:
                 return False
         elif settings.COINDAEMON_ALGO == 'scrypt-jane':
             if self.scryptjane > target:
