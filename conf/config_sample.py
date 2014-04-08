@@ -17,7 +17,8 @@ COINDAEMON_TRUSTED_PORT = 8332
 COINDAEMON_TRUSTED_USER = 'user'
 COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
 #suan fa
-COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
+#COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
+COINDAEMON_ALGO = 'quark'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
 SCRYPTJANE_NAME = 'vtc_scrypt'# Set this to the Scrypt jane module name e.g. yac_scrypt or vtc_scrypt
 COINDAEMON_TX = False         # For Coins which support TX Messages please enter yes in the TX selection
 
@@ -142,7 +143,21 @@ VDIFF_FLOAT = False             # Use float difficulty
 
 # Pool Target (Base Difficulty)
 #POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
-POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
+#Kh/s        Difficulty       
+#1           +0.00000116
+#50          +0.000058
+#100         +0.000116
+#250         +0.00029
+#500         +0.00058
+#750         +0.00087
+#1000        +0.00116       
+#1250        +0.00145
+#1500        +0.00174       
+#1750        +0.00203
+#2000        +0.00232
+#POOL_TARGET = 0.010                # Pool-wide difficulty target int >= 1
+POOL_TARGET = 0.00116                # Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True            # Master variable difficulty enable
@@ -151,8 +166,10 @@ VARIABLE_DIFF = True            # Master variable difficulty enable
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or coindaemons difficulty)
 USE_COINDAEMON_DIFF = False     # Set the maximum difficulty to the coindaemon difficulty. 
 DIFF_UPDATE_FREQUENCY = 86400   # How often to check coindaemon difficulty. Should be less than coin difficulty retarget time
-VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
-VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
+#VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
+VDIFF_MIN_TARGET = 0.00087           # Minimum target difficulty 
+#VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
+VDIFF_MAX_TARGET = 0.08
 VDIFF_TARGET_TIME = 15          # Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120       # How often the miners difficulty changes if appropriate
 VDIFF_VARIANCE_PERCENT = 30     # Allow average time to very this % from target without retarget
