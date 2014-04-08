@@ -13,8 +13,6 @@ from mining.interfaces import Interfaces
 from extranonce_counter import ExtranonceCounter
 import lib.settings as settings
 import algo.coindefinition as coindef
-algo = __import__(coindef.algo_needed().algo())
-
 class JobIdGenerator(object):
     '''Generate pseudo-unique job_id. It does not need to be absolutely unique,
     because pool sends "clean_jobs" flag to clients and they should drop all previous jobs.'''
