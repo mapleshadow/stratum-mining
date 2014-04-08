@@ -3,6 +3,15 @@ import binascii
 import util
 import StringIO
 import settings
+if settings.COINDAEMON_ALGO == 'scrypt':
+    import ltc_scrypt
+elif settings.COINDAEMON_ALGO  == 'scrypt-jane':
+    scryptjane = __import__(settings.SCRYPTJANE_NAME) 
+elif settings.COINDAEMON_ALGO == 'quark':
+    import quark_hash
+elif settings.COINDAEMON_ALGO == 'skeinhash':
+    import skeinhash
+else: pass
 from twisted.internet import defer
 from lib.exceptions import SubmitException
 
@@ -12,7 +21,8 @@ log.debug("Got to Template Registry")
 from mining.interfaces import Interfaces
 from extranonce_counter import ExtranonceCounter
 import lib.settings as settings
-import algo.coindefinition as coindef
+
+
 class JobIdGenerator(object):
     '''Generate pseudo-unique job_id. It does not need to be absolutely unique,
     because pool sends "clean_jobs" flag to clients and they should drop all previous jobs.'''
@@ -140,7 +150,13 @@ class TemplateRegistry(object):
     
     def diff_to_target(self, difficulty):
         '''Converts difficulty to target'''
-        diff1 = coindef.diff1_needed().diff1()
+        if settings.COINDAEMON_ALGO == 'scrypt' or 'scrypt-jane':
+            diff1 = 0x0000ffff00000000000000000000000000000000000000000000000000000000
+        elif settings.COINDAEMON_ALGO == 'quark':
+            diff1 = 0x000000ffff000000000000000000000000000000000000000000000000000000
+        else:
+            diff1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000
+
         return diff1 / difficulty
     
     def get_job(self, job_id, worker_name, ip=False):
@@ -176,10 +192,22 @@ class TemplateRegistry(object):
         
             - extranonce1_bin is binary. No checks performed, it should be from session data
             - job_id, extranonce2, ntime, nonce - in hex form sent by the client
-            - difficulty - decimal number from session, again no checks performed
+            - difficulty - decimal number from session
             - submitblock_callback - reference to method which receive result of submitblock()
+            - difficulty is checked to see if its lower than the vardiff minimum target or pool target
+              from conf/config.py and if it is the share is rejected due to it not meeting the requirements for a share
+              
         '''
-        
+        if settings.VARIABLE_DIFF == True:
+            # Share Diff Should never be 0 
+            if difficulty < settings.VDIFF_MIN_TARGET :
+        	log.exception("Worker %s @ IP: %s seems to be submitting Fake Shares"%(worker_name,ip))
+        	raise SubmitException("Diff is %s Share Rejected Reporting to Admin"%(difficulty))
+        else:
+             if difficulty < settings.POOL_TARGET:
+             	log.exception("Worker %s @ IP: %s seems to be submitting Fake Shares"%(worker_name,ip))
+        	raise SubmitException("Diff is %s Share Rejected Reporting to Admin"%(difficulty))
+        	
         # Check if extranonce2 looks correctly. extranonce2 is in hex form...
         if len(extranonce2) != self.extranonce2_size * 2:
             raise SubmitException("Incorrect size of extranonce2. Expected %d chars" % (self.extranonce2_size*2))
@@ -226,14 +254,28 @@ class TemplateRegistry(object):
         header_bin = job.serialize_header(merkle_root_int, ntime_bin, nonce_bin)
     
         # 4. Reverse header and compare it with target of the user
-        hash_bin = algo.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
-	hash_int = util.uint256_from_str(hash_bin)
+        if settings.COINDAEMON_ALGO == 'scrypt':
+            hash_bin = ltc_scrypt.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+        elif settings.COINDAEMON_ALGO  == 'scrypt-jane':
+        	if settings.SCRYPTJANE_NAME == 'vtc_scrypt':
+            	     hash_bin = scryptjane.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+      		else: 
+      		     hash_bin = scryptjane.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]), int(ntime, 16))
+        elif settings.COINDAEMON_ALGO == 'quark':
+            hash_bin = quark_hash.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+	elif settings.COINDAEMON_ALGO == 'skeinhash':
+            hash_bin = skeinhash.skeinhash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+        else:
+            hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+
+        hash_int = util.uint256_from_str(hash_bin)
         scrypt_hash_hex = "%064x" % hash_int
         header_hex = binascii.hexlify(header_bin)
-        
-	
-	if coindef.header_needed().header() == True:
-           header_hex = header_hex+"000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000"
+        if settings.COINDAEMON_ALGO == 'scrypt' or settings.COINDAEMON_ALGO == 'scrypt-jane':
+            header_hex = header_hex+"000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000"
+        elif settings.COINDAEMON_ALGO == 'quark':
+            header_hex = header_hex+"000000800000000000000000000000000000000000000000000000000000000000000000000000000000000080020000"
+        else: pass
                  
         target_user = self.diff_to_target(difficulty)
         if hash_int > target_user:
@@ -253,8 +295,12 @@ class TemplateRegistry(object):
             log.info("We found a block candidate! %s" % scrypt_hash_hex)
 
             # Reverse the header and get the potential block hash (for scrypt only) 
+            #if settings.COINDAEMON_ALGO == 'scrypt' or settings.COINDAEMON_ALGO == 'sha256d':
+            #   if settings.COINDAEMON_Reward == 'POW':
             block_hash_bin = util.doublesha(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
             block_hash_hex = block_hash_bin[::-1].encode('hex_codec')
+            #else:   block_hash_hex = hash_bin[::-1].encode('hex_codec')
+            #else:  block_hash_hex = hash_bin[::-1].encode('hex_codec')
             # 6. Finalize and serialize block object 
             job.finalize(merkle_root_int, extranonce1_bin, extranonce2_bin, int(ntime, 16), int(nonce, 16))
             

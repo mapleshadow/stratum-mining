@@ -9,23 +9,16 @@ You NEED to set the parameters in BASIC SETTINGS
 CONFIG_VERSION = 0.1
 # ******************** BASIC SETTINGS ***************
 # These are the MUST BE SET parameters!
-#wallet address
+
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'                # Local coin address where money goes
-#RPC
+
 COINDAEMON_TRUSTED_HOST = 'localhost'
 COINDAEMON_TRUSTED_PORT = 8332
 COINDAEMON_TRUSTED_USER = 'user'
-COINDAEMON_TRUSTED_PASSWORD = 'password'                        
-ALGORITHM = 5 
-# Algorithm Array is as follows:
-# Scrypt = 1
-# SHA256 = 2(none)
-# YAC = 3
-# Quark = 4
-# X11 = 5
-# Skein = 6
-# HybridSHA256 = 7
-# Adding a new algo is as simple as editing lib/coindefinition.py and adding the algorithm to the array 
+COINDAEMON_TRUSTED_PASSWORD = 'somepassword'
+
+COINDAEMON_ALGO = 'scrypt'    # The available options are:  scrypt, sha256d, scrypt-jane, skeinhash, and quark
+SCRYPTJANE_NAME = 'vtc_scrypt'# Set this to the Scrypt jane module name e.g. yac_scrypt or vtc_scrypt
 COINDAEMON_TX = False         # For Coins which support TX Messages please enter yes in the TX selection
 
 # ******************** BASIC SETTINGS ***************
@@ -74,7 +67,7 @@ HOSTNAME = 'localhost'
 
 # Disable the example service
 ENABLE_EXAMPLE_SERVICE = False
-#wa kuang duan kou
+
 # Port used for Socket transport. Use 'None' for disabling the transport.
 LISTEN_SOCKET_TRANSPORT = 3333
 # Port used for HTTP Poll transport. Use 'None' for disabling the transport
@@ -87,9 +80,7 @@ LISTEN_WS_TRANSPORT = None
 LISTEN_WSS_TRANSPORT = None
 
 # Salt used for Block Notify Password
-#PASSWORD_SALT = '24位数加密码（任意字母大小写），对应MPOS配置'
-#PASSWORD_SALT = 'some_crazy_string'
-PASSWORD_SALT = 'aaaaaaaaAAAAAAAaaaaaaaaA'
+PASSWORD_SALT = 'some_crazy_string'
 
 # ******************** Database  *********************
 DATABASE_DRIVER = 'mysql'       # Options: none, sqlite, postgresql or mysql
@@ -148,22 +139,7 @@ VDIFF_X2_TYPE = True            # Powers of 2 e.g. 2,4,8,16,32,64,128,256,512,10
 VDIFF_FLOAT = False             # Use float difficulty
 
 # Pool Target (Base Difficulty)
-#POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
-#POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
-#Kh/s        Difficulty       
-#1           +0.00000116
-#50          +0.000058
-#100         +0.000116
-#250         +0.00029
-#500         +0.00058
-#750         +0.00087
-#1000        +0.00116       
-#1250        +0.00145
-#1500        +0.00174       
-#1750        +0.00203
-#2000        +0.00232
-#POOL_TARGET = 0.010                # Pool-wide difficulty target int >= 1
-POOL_TARGET = 0.00116                # Pool-wide difficulty target int >= 1
+POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True            # Master variable difficulty enable
@@ -172,10 +148,8 @@ VARIABLE_DIFF = True            # Master variable difficulty enable
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or coindaemons difficulty)
 USE_COINDAEMON_DIFF = False     # Set the maximum difficulty to the coindaemon difficulty. 
 DIFF_UPDATE_FREQUENCY = 86400   # How often to check coindaemon difficulty. Should be less than coin difficulty retarget time
-#VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
-VDIFF_MIN_TARGET = 0.00087           # Minimum target difficulty 
-#VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
-VDIFF_MAX_TARGET = 0.08
+VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
+VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
 VDIFF_TARGET_TIME = 15          # Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120       # How often the miners difficulty changes if appropriate
 VDIFF_VARIANCE_PERCENT = 30     # Allow average time to very this % from target without retarget
@@ -216,4 +190,4 @@ NOTIFY_EMAIL_USETLS = True
 MEMCACHE_HOST = "localhost"     # Hostname or IP that runs memcached
 MEMCACHE_PORT = 11211           # Port
 MEMCACHE_TIMEOUT = 900          # Key timeout
-MEMCACHE_PREFIX = "stratum_xxx_"    # Prefix for keys
+MEMCACHE_PREFIX = "stratum_"    # Prefix for keys
