@@ -8,7 +8,8 @@ if settings.COINDAEMON_ALGO == 'scrypt':
 elif settings.COINDAEMON_ALGO  == 'scrypt-jane':
     scryptjane = __import__(settings.SCRYPTJANE_NAME) 
 elif settings.COINDAEMON_ALGO == 'quark':
-    import quark_hash
+    #import quark_hash
+    import dark_hash
 elif settings.COINDAEMON_ALGO == 'skeinhash':
     import skeinhash
 else: pass
@@ -150,15 +151,18 @@ class TemplateRegistry(object):
     
     def diff_to_target(self, difficulty):
         '''Converts difficulty to target'''
-        if settings.COINDAEMON_ALGO == 'scrypt' or 'scrypt-jane':
-            diff1 = 0x0000ffff00000000000000000000000000000000000000000000000000000000
-        elif settings.COINDAEMON_ALGO == 'quark':
-            diff1 = 0x000000ffff000000000000000000000000000000000000000000000000000000
-        else:
-            diff1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000
-
-        return diff1 / difficulty
+#        if settings.COINDAEMON_ALGO == 'scrypt' or 'scrypt-jane':
+#            diff1 = 0x0000ffff00000000000000000000000000000000000000000000000000000000
+#        elif settings.COINDAEMON_ALGO == 'quark':
+#            diff1 = 0x000000ffff000000000000000000000000000000000000000000000000000000
+#        else:
+#            diff1 = 0x00000000ffff0000000000000000000000000000000000000000000000000000
+#
+#        return diff1 / difficulty
     
+         assert difficulty >= 0
+         if difficulty == 0: return 2**256-1
+         return min(int((0xffff0000 * 2**(256-64) + 1)/difficulty - 1 + 0.5), 2**256-1)
     def get_job(self, job_id, worker_name, ip=False):
         '''For given job_id returns BlockTemplate instance or None'''
         try:
@@ -262,7 +266,8 @@ class TemplateRegistry(object):
       		else: 
       		     hash_bin = scryptjane.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]), int(ntime, 16))
         elif settings.COINDAEMON_ALGO == 'quark':
-            hash_bin = quark_hash.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+            #hash_bin = quark_hash.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
+            hash_bin = dark_hash.getPoWHash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
 	elif settings.COINDAEMON_ALGO == 'skeinhash':
             hash_bin = skeinhash.skeinhash(''.join([ header_bin[i*4:i*4+4][::-1] for i in range(0, 20) ]))
         else:

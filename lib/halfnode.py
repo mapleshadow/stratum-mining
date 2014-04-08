@@ -28,7 +28,8 @@ elif settings.COINDAEMON_ALGO == 'scrypt-jane':
     log.debug("########################################### LoadingScrypt jane #########################################################")
 elif settings.COINDAEMON_ALGO == 'quark':
     log.debug("########################################### Loading Quark Support #########################################################")
-    import quark_hash
+#    import quark_hash
+    import dark_hash
 elif settings.COINDAEMON_ALGO == 'skeinhash':
     import skeinhash
 
@@ -293,7 +294,8 @@ class CBlock(object):
                 r.append(struct.pack("<I", self.nTime))
                 r.append(struct.pack("<I", self.nBits))
                 r.append(struct.pack("<I", self.nNonce))
-                self.quark = uint256_from_str(quark_hash.getPoWHash(''.join(r)))
+                #self.quark = uint256_from_str(quark_hash.getPoWHash(''.join(r)))
+                self.quark = uint256_from_str(dark_hash.getPoWHash(''.join(r)))
              return self.quark
     elif settings.COINDAEMON_ALGO == 'scrypt-jane':
         def calc_scryptjane(self):
