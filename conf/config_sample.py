@@ -169,7 +169,7 @@ DIFF_UPDATE_FREQUENCY = 86400   # How often to check coindaemon difficulty. Shou
 VDIFF_MIN_TARGET = 0.00087           # Minimum target difficulty 
 #VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
 VDIFF_MAX_TARGET = 0.08
-
+VDIFF_MIN_CHANGE = 1            # Minimum change of worker's difficulty if VDIFF_X2_TYPE=False and the final difficulty will be within the boundaries (VDIFF_MIN_TARGET, VDIFF_MAX_TARGET)
 VDIFF_TARGET_TIME = 15          # Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120       # How often the miners difficulty changes if appropriate
 VDIFF_VARIANCE_PERCENT = 30     # Allow average time to very this % from target without retarget
