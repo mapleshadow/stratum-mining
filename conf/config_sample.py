@@ -115,7 +115,7 @@ DB_STATS_AVG_TIME = 300         # When using the DATABASE_EXTEND option, average
 DB_USERCACHE_TIME = 600         # How long the usercache is good for before we refresh
 
 # ******************** Pool Settings *********************
-
+# zi dong kuang gong she zhi
 # User Auth Options
 USERS_AUTOADD = False           # Automatically add users to database when they connect.
                                 # This basically disables User Auth for the pool.
