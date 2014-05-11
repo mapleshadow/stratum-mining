@@ -13,10 +13,11 @@ CONFIG_VERSION = 0.1
 CENTRAL_WALLET = 'set_valid_addresss_in_config!'                # Local coin address where money goes
 
 COINDAEMON_TRUSTED_HOST = 'localhost'
+# RPC
 COINDAEMON_TRUSTED_PORT = 8332
 COINDAEMON_TRUSTED_USER = 'user'
 COINDAEMON_TRUSTED_PASSWORD = 'password'                        
-ALGORITHM = 1 
+ALGORITHM = 5 
 # Algorithm Array is as follows:
 # Scrypt = 1
 # SHA256 = 2(none)
@@ -120,7 +121,7 @@ DB_STATS_AVG_TIME = 300         # When using the DATABASE_EXTEND option, average
 DB_USERCACHE_TIME = 600         # How long the usercache is good for before we refresh
 
 # ******************** Pool Settings *********************
-
+# zi dong kuang gong she zhi
 # User Auth Options
 USERS_AUTOADD = False           # Automatically add users to database when they connect.
                                 # This basically disables User Auth for the pool.
@@ -146,7 +147,26 @@ VDIFF_X2_TYPE = True            # Powers of 2 e.g. 2,4,8,16,32,64,128,256,512,10
 VDIFF_FLOAT = False             # Use float difficulty
 
 # Pool Target (Base Difficulty)
-POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 32                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 16                # Pool-wide difficulty target int >= 1
+#Kh/s        Difficulty       
+#1           +0.00000116
+#50          +0.000058
+#100         +0.000116
+#250         +0.00029
+#500         +0.00058
+#750         +0.00087
+#1000        +0.00116       
+#1250        +0.00145
+#1500        +0.00174       
+#1750        +0.00203
+#2000        +0.00232
+
+#MPOS 8 = ST 0.004
+#MPOS 6.25 = ST 0.00116
+#POOL_TARGET = 0.010                # Pool-wide difficulty target int >= 1
+POOL_TARGET = 0.004                # Pool-wide difficulty target int >= 1
+#POOL_TARGET = 0.00116                # Pool-wide difficulty target int >= 1
 
 # Variable Difficulty Enable
 VARIABLE_DIFF = True            # Master variable difficulty enable
@@ -155,8 +175,11 @@ VARIABLE_DIFF = True            # Master variable difficulty enable
 #VARDIFF will start at the POOL_TARGET. It can go as low as the VDIFF_MIN and as high as min(VDIFF_MAX or coindaemons difficulty)
 USE_COINDAEMON_DIFF = False     # Set the maximum difficulty to the coindaemon difficulty. 
 DIFF_UPDATE_FREQUENCY = 86400   # How often to check coindaemon difficulty. Should be less than coin difficulty retarget time
-VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
-VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
+
+#VDIFF_MIN_TARGET = 16           # Minimum target difficulty 
+VDIFF_MIN_TARGET = 0.00087           # Minimum target difficulty 
+#VDIFF_MAX_TARGET = 1024         # Maximum target difficulty 
+VDIFF_MAX_TARGET = 0.08
 VDIFF_TARGET_TIME = 15          # Target time per share (i.e. try to get 1 share per this many seconds)
 VDIFF_RETARGET_TIME = 120       # How often the miners difficulty changes if appropriate
 VDIFF_VARIANCE_PERCENT = 30     # Allow average time to very this % from target without retarget
@@ -197,4 +220,4 @@ NOTIFY_EMAIL_USETLS = True
 MEMCACHE_HOST = "localhost"     # Hostname or IP that runs memcached
 MEMCACHE_PORT = 11211           # Port
 MEMCACHE_TIMEOUT = 900          # Key timeout
-MEMCACHE_PREFIX = "stratum_"    # Prefix for keys
+MEMCACHE_PREFIX = "stratum_xxx_"    # Prefix for keys
