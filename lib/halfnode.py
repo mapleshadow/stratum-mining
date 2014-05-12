@@ -11,20 +11,39 @@ import sys
 import random
 import cStringIO
 from Crypto.Hash import SHA256
+
 from twisted.internet.protocol import Protocol
 from util import *
 import settings
+
 import lib.logger
 log = lib.logger.get_logger('halfnode')
 log.debug("Got to Halfnode")
 
-import algo.coindefinition as coindef
-algo = __import__(coindef.algo_needed().algo())
-log.debug("########################################### Loading %s  #########################################################", algo)
+if settings.COINDAEMON_ALGO == 'scrypt':
+    log.debug("########################################### Loading LTC Scrypt #########################################################")
+    import ltc_scrypt
+elif settings.COINDAEMON_ALGO == 'scrypt-jane':
+    __import__(settings.SCRYPTJANE_NAME)
+    log.debug("########################################### LoadingScrypt jane #########################################################")
+elif settings.COINDAEMON_ALGO == 'xcoin':
+    log.debug("########################################### Loading Xcoin Scrypt #########################################################")
+    import xcoin_hash
+elif settings.COINDAEMON_ALGO == 'quark':
+    log.debug("########################################### Loading Quark Support #########################################################")
+    import quark_hash
+elif settings.COINDAEMON_ALGO == 'skeinhash':
+    import skeinhash
+
+else: 
+    log.debug("########################################### Loading SHA256 Support ######################################################")
 if settings.COINDAEMON_TX != False:
     log.debug("########################################### Loading SHA256 Transaction Message Support #########################################################")
+    pass
 else:
     log.debug("########################################### NOT Loading SHA256 Transaction Message Support ######################################################")
+    pass
+
 
 MY_VERSION = 31402
 MY_SUBVERSION = ".4"
@@ -132,8 +151,6 @@ class CTxOut(object):
         r = ""
         r += struct.pack("<q", self.nValue)
         r += ser_string(self.scriptPubKey)
-
-        print "ctxout", self.scriptPubKey, ser_string(self.scriptPubKey)
         return r
     def __repr__(self):
         return "CTxOut(nValue=%i.%08i scriptPubKey=%s)" % (self.nValue // 100000000, self.nValue % 100000000, binascii.hexlify(self.scriptPubKey))
@@ -209,30 +226,6 @@ class CTransaction(object):
     def __repr__(self):
         return "CTransaction(nVersion=%i vin=%s vout=%s nLockTime=%i)" % (self.nVersion, repr(self.vin), repr(self.vout), self.nLockTime)
 
-class CMasterNodeVote(object):        
-    def __init__(self):
-        """int votes;
-        CScript pubkey;
-        int64 blockHeight"""
-
-        self.blockHeight = 0
-        self.scriptPubKey = ""
-        self.votes = 0
-    def deserialize(self, f):
-        self.blockHeight = struct.unpack("<q", f.read(8))[0]
-        self.scriptPubKey = deser_string(f)
-        self.votes = struct.unpack("<i", f.read(4))[0]
-    def serialize(self):
-        r = ""
-        r += struct.pack("<q", self.blockHeight)
-        r += ser_string(self.scriptPubKey)
-        r += struct.pack("<i", self.votes)
-        print "mnv", self.scriptPubKey, ser_string(self.scriptPubKey)
-        return r
-    def __repr__(self):
-        return "CMasterNodeVote(blockHeight=%d scriptPubKey=%s, votes=%d)" % (self.blockHeight, binascii.hexlify(self.scriptPubKey), self.votes)
-
-
 class CBlock(object):
     def __init__(self):
         self.nVersion = 1
@@ -242,10 +235,17 @@ class CBlock(object):
         self.nBits = 0
         self.nNonce = 0
         self.vtx = []
-        self.vmn = []
         self.sha256 = None
-        self.algo = None
-        self.masternode_payments = False
+        if settings.COINDAEMON_ALGO == 'scrypt':
+            self.scrypt= None
+        elif settings.COINDAEMON_ALGO == 'scrypt-jane':
+            self.scryptjane = None
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            self.xcoin = None
+        elif settings.COINDAEMON_ALGO == 'quark':
+            self.quark = None
+        elif settings.COINDAEMON_ALGO == 'skein':
+            self.skein = None
         if settings.COINDAEMON_Reward == 'POS':
             self.signature = b""
         else: pass
@@ -258,10 +258,9 @@ class CBlock(object):
         self.nBits = struct.unpack("<I", f.read(4))[0]
         self.nNonce = struct.unpack("<I", f.read(4))[0]
         self.vtx = deser_vector(f, CTransaction)
-        if self.masternode_payments: self.vmn = deser_vector(f, CMasterNodeVote)
         if settings.COINDAEMON_Reward == 'POS':
             self.signature = deser_string(f)
-
+        else: pass
 
     def serialize(self):
         r = []
@@ -272,31 +271,119 @@ class CBlock(object):
         r.append(struct.pack("<I", self.nBits))
         r.append(struct.pack("<I", self.nNonce))
         r.append(ser_vector(self.vtx))
-        if self.masternode_payments: r.append(ser_vector(self.vmn))
         if settings.COINDAEMON_Reward == 'POS':
             r.append(ser_string(self.signature))
+        else: pass
         return ''.join(r)
 
-    def calc_algo(self):
-        if self.algo is None:
-           r = []
-           r.append(struct.pack("<i", self.nVersion))
-           r.append(ser_uint256(self.hashPrevBlock))
-           r.append(ser_uint256(self.hashMerkleRoot))
-           r.append(struct.pack("<I", self.nTime))
-           r.append(struct.pack("<I", self.nBits))
-           r.append(struct.pack("<I", self.nNonce))
-           self.algo = uint256_from_str(algo.getPoWHash(''.join(r)))
-        return self.algo
+    if settings.COINDAEMON_ALGO == 'scrypt':
+       def calc_scrypt(self):
+           if self.scrypt is None:
+               r = []
+               r.append(struct.pack("<i", self.nVersion))
+               r.append(ser_uint256(self.hashPrevBlock))
+               r.append(ser_uint256(self.hashMerkleRoot))
+               r.append(struct.pack("<I", self.nTime))
+               r.append(struct.pack("<I", self.nBits))
+               r.append(struct.pack("<I", self.nNonce))
+               self.scrypt = uint256_from_str(ltc_scrypt.getPoWHash(''.join(r)))
+           return self.scrypt
+    elif settings.COINDAEMON_ALGO == 'xcoin':
+         def calc_xcoin(self):
+             if self.quark is None:
+                r = []
+                r.append(struct.pack("<i", self.nVersion))
+                r.append(ser_uint256(self.hashPrevBlock))
+                r.append(ser_uint256(self.hashMerkleRoot))
+                r.append(struct.pack("<I", self.nTime))
+                r.append(struct.pack("<I", self.nBits))
+                r.append(struct.pack("<I", self.nNonce))
+                self.quark = uint256_from_str(quark_hash.getPoWHash(''.join(r)))
+             return self.xcoin
+    elif settings.COINDAEMON_ALGO == 'quark':
+         def calc_quark(self):
+             if self.quark is None:
+                r = []
+                r.append(struct.pack("<i", self.nVersion))
+                r.append(ser_uint256(self.hashPrevBlock))
+                r.append(ser_uint256(self.hashMerkleRoot))
+                r.append(struct.pack("<I", self.nTime))
+                r.append(struct.pack("<I", self.nBits))
+                r.append(struct.pack("<I", self.nNonce))
+                self.quark = uint256_from_str(quark_hash.getPoWHash(''.join(r)))
+             return self.quark
+    elif settings.COINDAEMON_ALGO == 'scrypt-jane':
+        def calc_scryptjane(self):
+             if self.scryptjane is None:
+                r = []
+                r.append(struct.pack("<i", self.nVersion))
+                r.append(ser_uint256(self.hashPrevBlock))
+                r.append(ser_uint256(self.hashMerkleRoot))
+                r.append(struct.pack("<I", self.nTime))
+                r.append(struct.pack("<I", self.nBits))
+                r.append(struct.pack("<I", self.nNonce))
+                self.scryptjane = uint256_from_str(settings.SCRYPTJANE_NAME.getPoWHash(''.join(r)))
+             return self.scryptjane
+    elif settings.COINDAEMON_ALGO == 'skein':
+        def calc_skein(self):
+             if self.skein is None:
+                r = []
+                r.append(struct.pack("<i", self.nVersion))
+                r.append(ser_uint256(self.hashPrevBlock))
+                r.append(ser_uint256(self.hashMerkleRoot))
+                r.append(struct.pack("<I", self.nTime))
+                r.append(struct.pack("<I", self.nBits))
+                r.append(struct.pack("<I", self.nNonce))
+                self.skein = uint256_from_str(skeinhash.skeinhash(''.join(r)))
+             return self.skein
+    else:
+       def calc_sha256(self):
+           if self.sha256 is None:
+               r = []
+               r.append(struct.pack("<i", self.nVersion))
+               r.append(ser_uint256(self.hashPrevBlock))
+               r.append(ser_uint256(self.hashMerkleRoot))
+               r.append(struct.pack("<I", self.nTime))
+               r.append(struct.pack("<I", self.nBits))
+               r.append(struct.pack("<I", self.nNonce))
+               self.sha256 = uint256_from_str(SHA256.new(SHA256.new(''.join(r)).digest()).digest())
+           return self.sha256
 
 
     def is_valid(self):
-        self.calc_algo()
+        if settings.COINDAEMON_ALGO == 'scrypt':
+            self.calc_scrypt()
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            self.calc_xcoin()
+        elif settings.COINDAEMON_ALGO == 'quark':
+            self.calc_quark()
+        elif settings.COINDAEMON_ALGO == 'scrypt-jane':
+            self.calc_scryptjane
+        elif settings.COINDAEMON_ALGO == 'skein':
+            self.calc_skein
+        else:
+            self.calc_sha256()
 
         target = uint256_from_compact(self.nBits)
 
-        if self.algo > target:
-           return False
+        if settings.COINDAEMON_ALGO == 'scrypt':
+            if self.scrypt > target:
+                return False
+        elif settings.COINDAEMON_ALGO == 'xcoin':
+            if self.xcoin > target:
+                return False
+        elif settings.COINDAEMON_ALGO == 'quark':
+            if self.quark > target:
+                return False
+        elif settings.COINDAEMON_ALGO == 'scrypt-jane':
+            if self.scryptjane > target:
+                return False
+        elif settings.COINDAEMON_ALGO == 'skein':
+            if self.skein > target:
+                return False
+        else:
+           if self.sha256 > target:
+                return False
 
         hashes = []
         for tx in self.vtx:
@@ -317,7 +404,7 @@ class CBlock(object):
             return False
         return True
     def __repr__(self):
-        return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s, vmn=%s)" % (self.nVersion, self.hashPrevBlock, self.hashMerkleRoot, time.ctime(self.nTime), self.nBits, self.nNonce, repr(self.vtx), repr(self.vmn))
+        return "CBlock(nVersion=%i hashPrevBlock=%064x hashMerkleRoot=%064x nTime=%s nBits=%08x nNonce=%08x vtx=%s)" % (self.nVersion, self.hashPrevBlock, self.hashMerkleRoot, time.ctime(self.nTime), self.nBits, self.nNonce, repr(self.vtx))
 
 class msg_version(object):
     command = "version"

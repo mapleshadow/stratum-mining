@@ -53,15 +53,17 @@ class BlockTemplate(halfnode.CBlock):
     def fill_from_rpc(self, data):
         '''Convert getblocktemplate result into BlockTemplate instance'''
         
-        payee = None
-        if(data['payee'] != ''): payee = util.script_to_address(data['payee'])
-
         #txhashes = [None] + [ binascii.unhexlify(t['hash']) for t in data['transactions'] ]
         txhashes = [None] + [ util.ser_uint256(int(t['hash'], 16)) for t in data['transactions'] ]
         mt = merkletree.MerkleTree(txhashes)
-        coinbase = CoinbaseTransactionPOW(self.timestamper, self.coinbaser, payee, data['coinbasevalue'],
-                                          data['coinbaseaux']['flags'], data['height'],
-                                          settings.COINBASE_EXTRAS)
+        if settings.COINDAEMON_Reward == 'POW':
+            coinbase = CoinbaseTransactionPOW(self.timestamper, self.coinbaser, data['coinbasevalue'],
+                                              data['coinbaseaux']['flags'], data['height'],
+                                              settings.COINBASE_EXTRAS)
+        else:
+            coinbase = CoinbaseTransactionPOS(self.timestamper, self.coinbaser, data['coinbasevalue'],
+                                              data['coinbaseaux']['flags'], data['height'],
+                                              settings.COINBASE_EXTRAS, data['curtime'])
 
         self.height = data['height']
         self.nVersion = data['version']
@@ -70,14 +72,8 @@ class BlockTemplate(halfnode.CBlock):
         self.hashMerkleRoot = 0
         self.nTime = 0
         self.nNonce = 0
-        self.masternode_payments = data['masternode_payments']
         self.vtx = [ coinbase, ]
-
-        for vote in data['votes']:
-            v = halfnode.CMasterNodeVote()
-            v.deserialize(StringIO.StringIO(binascii.unhexlify(vote)))
-            self.vmn.append(v)
-
+        
         for tx in data['transactions']:
             t = halfnode.CTransaction()
             t.deserialize(StringIO.StringIO(binascii.unhexlify(tx['data'])))

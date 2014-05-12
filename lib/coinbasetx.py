@@ -16,7 +16,7 @@ class CoinbaseTransactionPOW(halfnode.CTransaction):
     extranonce_placeholder = struct.pack(extranonce_type, int('f000000ff111111f', 16))
     extranonce_size = struct.calcsize(extranonce_type)
 
-    def __init__(self, timestamper, coinbaser, payee, value, flags, height, data):
+    def __init__(self, timestamper, coinbaser, value, flags, height, data):
         super(CoinbaseTransactionPOW, self).__init__()
         log.debug("Got to CoinBaseTX")
         #self.extranonce = 0
@@ -34,15 +34,6 @@ class CoinbaseTransactionPOW(halfnode.CTransaction):
         )
                 
         tx_in.scriptSig = tx_in._scriptSig_template[0] + self.extranonce_placeholder + tx_in._scriptSig_template[1]
-
-        tx_out2 = None 
-        if(payee != None):
-            value2 = value / 10
-            value  -= value2
-
-            tx_out2 = halfnode.CTxOut()
-            tx_out2.nValue = value2
-            tx_out2.scriptPubKey = payee
     
         tx_out = halfnode.CTxOut()
         tx_out.nValue = value
@@ -52,7 +43,6 @@ class CoinbaseTransactionPOW(halfnode.CTransaction):
             self.strTxComment = "http://github.com/ahmedbodi/stratum-mining"
         self.vin.append(tx_in)
         self.vout.append(tx_out)
-        if tx_out2: self.vout.append(tx_out2)
         
         # Two parts of serialized coinbase, just put part1 + extranonce + part2 to have final serialized tx
         self._serialized = super(CoinbaseTransactionPOW, self).serialize().split(self.extranonce_placeholder)
@@ -101,7 +91,6 @@ class CoinbaseTransactionPOS(halfnode.CTransaction):
             self.strTxComment = "http://github.com/ahmedbodi/stratum-mining"
         self.vin.append(tx_in)
         self.vout.append(tx_out)
-        if tx_out2: self.vout.append(tx_out2)
         
         # Two parts of serialized coinbase, just put part1 + extranonce + part2 to have final serialized tx
         self._serialized = super(CoinbaseTransactionPOS, self).serialize().split(self.extranonce_placeholder)
